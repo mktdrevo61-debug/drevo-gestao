@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DREVO GESTÃO</title>
+    <link rel="icon" href="favicon.png?v=2" type="image/png">
+    <link rel="apple-touch-icon" href="favicon.png?v=2">
+    <link rel="manifest" href="manifest.json">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --accent: #000000;
+            --card: #f5f5f5;
+            --standby: #ffcc00;
+            --finish: #28a745;
+            --danger: #dc3545;
+            --border: #dddddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: #000;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            width: 100%;
+        }
+
+        .timer {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.2rem, 12vw, 4.5rem);
+            font-weight: 700;
+            margin: 20px 0;
+            color: #000;
+            letter-spacing: -2px;
+            white-space: nowrap;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 22px;
+            border-radius: 15px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            transition: 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            opacity: 0.8;
+        }
+
+        .btn-start {
+            background: #000;
+            color: #fff;
+        }
+
+        .btn-stop {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-pause {
+            background: var(--standby);
+            color: #000;
+        }
+
+        .task-item {
+            background: #eeeeee;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 15px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-item.active {
+            border-color: #000;
+            background: #fafafa;
+        }
+
+        .status-badge {
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            border: 1px solid #ddd;
+        }
+
+        .login-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .login-item {
+            background: #eeeeee;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .login-item:active {
+            background: #f0f0f0;
+        }
+
+        #modal-senha {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+
+        .pass-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #eee;
+            margin: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .pass-dot.filled {
+            background: #000;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .key {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            border: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            background: #fff;
+            color: #000;
+        }
+
+        .key:active {
+            background: #eee;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .syncing {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .btn-reset {
+            background: none;
+            border: none;
+            color: #ddd;
+            font-size: 10px;
+            margin-top: 50px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 10px;
+            }
+            .card {
+                padding: 20px 15px;
+            }
+            .timer {
+                letter-spacing: -1px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="logo-container">
+            <img src="logo_drevo.png" alt="Drevo Logo" class="logo-img" style="max-width: 300px; height: auto;"
+                onerror="this.style.display='none'; document.getElementById('logo-text').style.display='block';">
+            <h1 id="logo-text" style="display:none; color: #000; font-family: 'Orbitron'; letter-spacing: 5px;">DREVO
+            </h1>
+        </div>
+        <div id="view-login">
+            <div class="card" id="grid-card">
+                <div style="display:flex; justify-content: center; align-items:center; margin-bottom: 25px;">
+                    <h3 style="color: #555; margin:0; font-weight: 300; text-align:center; width: 100%;">SELECIONE SEU NOME</h3>
+                </div>
+                <div class="login-grid" id="grid-users"></div>
+            </div>
+        </div>
+        </div>
+        <div id="modal-senha" class="hidden">
+            <h3 id="pass-label" style="color: #444; margin-bottom: 10px; letter-spacing: 2px;">SENHA DE ACESSO</h3>
+            <div style="display:flex; justify-content: center;">
+                <div class="pass-dot" id="dot-0"></div>
+                <div class="pass-dot" id="dot-1"></div>
+                <div class="pass-dot" id="dot-2"></div>
+                <div class="pass-dot" id="dot-3"></div>
+            </div>
+            <div class="keypad">
+                <div class="key" onclick="CORE.press(1)">1</div>
+                <div class="key" onclick="CORE.press(2)">2</div>
+                <div class="key" onclick="CORE.press(3)">3</div>
+                <div class="key" onclick="CORE.press(4)">4</div>
+                <div class="key" onclick="CORE.press(5)">5</div>
+                <div class="key" onclick="CORE.press(6)">6</div>
+                <div class="key" onclick="CORE.press(7)">7</div>
+                <div class="key" onclick="CORE.press(8)">8</div>
+                <div class="key" onclick="CORE.press(9)">9</div>
+                <div class="key" style="border:none; font-size:0.8rem; color:#444" onclick="CORE.closePass()">VOLTAR
+                </div>
+                <div class="key" onclick="CORE.press(0)">0</div>
+                <div class="key" style="border:none; font-size:0.8rem; color:#444" onclick="CORE.clearPass()">LIMPAR
+                </div>
+            </div>
+        </div>
+        <div id="view-app" class="hidden">
+            <div id="sync-label" class="syncing hidden">Sincronizando tarefas...</div>
+            <div class="card">
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <span id="ui-user" style="color: var(--accent); font-weight: 700; font-size: 1.1rem;">---</span>
+                    <button onclick="CORE.logout()"
+                        style="background:rgba(255,255,255,0.05); color:#555; border:none; padding: 8px 15px; border-radius: 10px; font-size: 10px;">SAIR</button>
+                </div>
+                <h2 id="ui-task" style="margin: 0 0 10px 0; font-size: 1.6rem; font-weight: 700;">Selecione uma tarefa
+                </h2>
+                <div class="timer" id="ui-timer">00:00:00</div>
+                <div id="ui-controls">
+                    <button id="btn-start" class="btn btn-start" onclick="CORE.doStart()">Iniciar Produção</button>
+                    <button id="btn-pause" class="btn btn-pause hidden" onclick="CORE.doPause()">Entrar em
+                        Standby</button>
+                    <button id="btn-resume" class="btn btn-start hidden" onclick="CORE.doResume()">Retomar
+                        Tarefa</button>
+                    <button id="btn-finish" class="btn btn-stop hidden" onclick="CORE.doFinish()">Finalizar
+                        Produção</button>
+                </div>
+            </div>
+            <div id="ui-list-tasks"></div>
+            <button class="btn-reset" onclick="CORE.sync()" style="background:var(--accent); color:#fff; border:none; padding:12px; border-radius:10px; width:100%; margin-bottom:10px; font-weight:700;">ATUALIZAR TAREFAS</button>
+            <button class="btn-reset" onclick="CORE.resetAll()">RESTAURAR APP (EMERGÊNCIA)</button>
+        </div>
+    </div>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyTNDf7mLf_w1XZnUJskHYoeiEZZM8V2bvSxvdotNwAZYLZp_9zT7wCaMT5eRucyZ3LQ/exec";
+        const EQUIPE = ["FABIO", "MAURICIO", "CAIO", "PEDRO", "VITOR A", "BRUNO", "VITOR M", "FERNANDO", "JHONATAN", "HENRIQUE", "GABRIEL", "CLAUDEMIR"];
+
+        // Defina a senha de 4 dígitos para cada marceneiro aqui:
+        const SENHAS = {
+            "FABIO": "9258",
+            "MAURICIO": "2222",
+            "CAIO": "2525",
+            "PEDRO": "4444",
+            "VITOR A": "2204",
+            "BRUNO": "1535",
+            "VITOR M": "9749",
+            "FERNANDO": "2553",
+            "JHONATAN": "4148",
+            "HENRIQUE": "0000",
+            "GABRIEL": "1234",
+            "CLAUDEMIR": "1234"
+        };
+
+        const CORE = {
+            state: { user: null, temp: null, pass: "", task: null, status: 'Pendente', start: 0, timer: null },
+            init: function () {
+                this.showGrid();
+            },
+            showGrid: function () {
+                const grid = document.getElementById('grid-users');
+                grid.innerHTML = "";
+                
+                EQUIPE.forEach(u => {
+                    const d = document.createElement('div'); d.className = 'login-item'; d.innerText = u;
+                    d.onclick = () => { 
+                        this.state.temp = u; 
+                        this.state.pass = ""; 
+                        document.getElementById('modal-senha').classList.remove('hidden'); 
+                        this.updateDots(); 
+                    };
+                    grid.appendChild(d);
+                });
+            },
+            closePass: function () { document.getElementById('modal-senha').classList.add('hidden'); },
+            clearPass: function () { this.state.pass = ""; this.updateDots(); },
+            updateDots: function () { for (let i = 0; i < 4; i++) document.getElementById('dot-' + i).classList.toggle('filled', i < this.state.pass.length); },
+            press: function (n) {
+                if (this.state.pass.length < 4) {
+                    this.state.pass += n; this.updateDots();
+                    if (this.state.pass.length === 4) {
+                        setTimeout(() => {
+                            if (this.state.pass === SENHAS[this.state.temp]) {
+                                this.login(this.state.temp);
+                            } else {
+                                this.clearPass();
+                                // Pequeno delay para a tela limpar as bolinhas antes do alerta travar a tela
+                                setTimeout(() => alert("Senha incorreta!"), 50);
+                            }
+                        }, 200);
+                    }
+                }
+            },
+            login: function (nome) {
+                this.state.user = nome;
+                document.getElementById('modal-senha').classList.add('hidden');
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('view-app').classList.remove('hidden');
+                document.getElementById('ui-user').innerText = nome;
+
+                const cacheTask = localStorage.getItem('d_' + nome + '_t');
+                this.state.task = cacheTask ? JSON.parse(cacheTask) : null;
+                this.state.status = localStorage.getItem('d_' + nome + '_s') || 'Pendente';
+                const cacheStart = localStorage.getItem('d_' + nome + '_st');
+                this.state.start = cacheStart ? Number(cacheStart) : 0;
+
+                if (this.state.status === 'Em Andamento' && this.state.start > 0) this.startClock();
+                this.sync(); this.render();
+                
+                // Rotina de fim de expediente automático (18h)
+                if (this.expedienteTimer) clearInterval(this.expedienteTimer);
+                this.expedienteTimer = setInterval(() => {
+                    const now = new Date();
+                    if (now.getHours() >= 18 && this.state.status === 'Em Andamento') {
+                        const today = now.toDateString();
+                        // Garante que só pausa automaticamente 1 vez por dia (permitindo hora extra)
+                        if (localStorage.getItem('d_' + this.state.user + '_autopause') !== today) {
+                            localStorage.setItem('d_' + this.state.user + '_autopause', today);
+                            this.doPause("Fim de expediente (Automático)");
+                        }
+                    }
+                }, 60000);
+            },
+            sync: function () {
+                document.getElementById('sync-label').classList.remove('hidden');
+                const cb = 'cb' + Date.now();
+                window[cb] = (data) => {
+                    document.getElementById('sync-label').classList.add('hidden');
+                    const list = document.getElementById('ui-list-tasks'); list.innerHTML = "";
+                    if (!data.tarefas) return;
+                    data.tarefas.forEach(t => {
+                        const done = t.status === "Finalizado";
+
+                        // Pula (esconde) as tarefas que já estão finalizadas
+                        if (done) return;
+
+                        const div = document.createElement('div');
+                        div.className = 'task-item' + (this.state.task && t.row === this.state.task.row ? ' active' : '');
+                        div.innerHTML = `<div><strong>${t.nome}</strong><br><small style="color:#444">${t.status || 'Pendente'}</small></div><span class="status-badge" style="color:var(--accent)">OK</span>`;
+                        div.onclick = () => {
+                            if (this.state.status === 'Em Andamento' && this.state.task && t.row !== this.state.task.row) return alert("Pause ou finalize a atual primeiro!");
+                            this.state.task = t; this.state.status = t.status || 'Pendente'; this.save(); this.render();
+                        };
+                        list.appendChild(div);
+                    });
+                };
+                const s = document.createElement('script'); s.src = SCRIPT_URL + "?marceneiro=" + this.state.user + "&callback=" + cb; document.body.appendChild(s);
+            },
+            render: function () {
+                const uiTask = document.getElementById('ui-task');
+                const bStart = document.getElementById('btn-start'), bPause = document.getElementById('btn-pause'), bResume = document.getElementById('btn-resume'), bFinish = document.getElementById('btn-finish');
+                [bStart, bPause, bResume, bFinish].forEach(b => b.classList.add('hidden'));
+
+                // Remove o botão de projeto anterior se houver, para evitar duplicados ao re-renderizar
+                let btnProjeto = document.getElementById('btn-projeto');
+                if (btnProjeto) btnProjeto.remove();
+
+                if (!this.state.task) { uiTask.innerText = "Escolha uma tarefa"; bStart.classList.remove('hidden'); return; }
+                uiTask.innerText = this.state.task.nome;
+
+                // Verifica se há link do projeto/desenho na tarefa de forma extremamente flexível e resiliente
+                let linkProjeto = this.state.task.desenho || this.state.task.link || this.state.task.projeto || this.state.task['k 1'] || this.state.task['K 1'] || this.state.task['k1'] || this.state.task['K1'];
+
+                // Varredura inteligente de backup: se não achou pelas chaves comuns, busca qualquer campo da tarefa que comece com um link válido (http/https)
+                if (!linkProjeto) {
+                    for (const key in this.state.task) {
+                        const val = this.state.task[key];
+                        if (typeof val === 'string' && (val.startsWith('http://') || val.startsWith('https://'))) {
+                            linkProjeto = val;
+                            break;
+                        }
+                    }
+                }
+
+                if (linkProjeto && linkProjeto.trim() !== "") {
+                    btnProjeto = document.createElement('button');
+                    btnProjeto.id = 'btn-projeto';
+                    btnProjeto.className = 'btn';
+                    btnProjeto.style.background = '#4285F4'; // Azul oficial do Google Drive
+                    btnProjeto.style.color = '#fff';
+                    btnProjeto.innerText = 'Ver projeto';
+                    btnProjeto.onclick = () => window.open(linkProjeto.trim(), '_blank');
+                    const uiControls = document.getElementById('ui-controls');
+                    uiControls.parentNode.insertBefore(btnProjeto, uiControls);
+                }
+
+                if (this.state.status === 'Em Andamento') { bPause.classList.remove('hidden'); bFinish.classList.remove('hidden'); }
+                else if (this.state.status === 'Standby') { bResume.classList.remove('hidden'); bFinish.classList.remove('hidden'); }
+                else { bStart.classList.remove('hidden'); document.getElementById('ui-timer').innerText = "00:00:00"; }
+            },
+            doStart: function () {
+                if (!this.state.task) return alert("Selecione uma tarefa na lista!");
+                const agora = Date.now(); this.state.start = agora; this.state.status = 'Em Andamento';
+                this.save(); this.api("INICIAR"); this.startClock(); this.render();
+            },
+            doPause: function (motivoForcado = null) {
+                let m = motivoForcado;
+                if (!m) m = prompt("Motivo da pausa (ex: almoço, falta material)?");
+                if (m === null) return; // Usuário clicou em cancelar
+                if (m.trim() === "") m = "Pausa de rotina"; // Se deixou em branco, usa um padrão
+
+                this.state.status = 'Standby';
+                this.save();
+                if (this.state.timer) clearInterval(this.state.timer);
+                document.getElementById('ui-timer').innerText = "00:00:00"; // Zera visualmente o relógio
+                this.api("STANDBY", m);
+                this.render();
+            },
+            doResume: function () { this.state.status = 'Em Andamento'; this.state.start = Date.now(); this.save(); this.api("RETOMAR"); this.startClock(); this.render(); },
+            doFinish: function () {
+                if (!confirm("Deseja finalizar e concluir esta tarefa?")) return;
+
+                const n = this.state.user;
+                if (this.state.timer) clearInterval(this.state.timer);
+                localStorage.removeItem('d_' + n + '_t');
+                localStorage.removeItem('d_' + n + '_s');
+                localStorage.removeItem('d_' + n + '_st');
+
+                this.api("FINALIZAR").then(() => {
+                    alert("Concluído!");
+                    location.reload();
+                });
+            },
+            startClock: function () {
+                if (this.state.timer) clearInterval(this.state.timer);
+                const atualizar = () => {
+                    if (!this.state.start || this.state.start === 0) return;
+                    const diff = Math.floor((Date.now() - Number(this.state.start)) / 1000);
+                    if (isNaN(diff) || diff < 0) return;
+                    const h = Math.floor(diff / 3600); const m = Math.floor((diff % 3600) / 60); const s = diff % 60;
+                    document.getElementById('ui-timer').innerText = h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0') + ":" + s.toString().padStart(2, '0');
+                };
+                atualizar(); this.state.timer = setInterval(atualizar, 1000);
+            },
+            api: function (a, o = "") {
+                return fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: a, marceneiro: this.state.user, row: this.state.task.row, obs: o }) })
+                    .then(() => { setTimeout(() => this.sync(), 1500); });
+            },
+            save: function () {
+                const n = this.state.user; if (!n) return;
+                localStorage.setItem('d_' + n + '_t', JSON.stringify(this.state.task));
+                localStorage.setItem('d_' + n + '_s', this.state.status);
+                localStorage.setItem('d_' + n + '_st', this.state.start);
+            },
+            logout: function () {
+                if (this.state.status === 'Em Andamento') {
+                    alert("Você não pode sair enquanto uma tarefa está 'Em Andamento'. Por favor, clique em 'Entrar em Standby' primeiro!");
+                    return;
+                }
+                location.reload();
+            },
+            resetAll: function () { if (confirm("Limpar tudo?")) { localStorage.clear(); location.reload(); } }
+        };
+        window.onload = () => CORE.init();
+    </script>
+</body>
+
+</html>
