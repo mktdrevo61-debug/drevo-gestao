@@ -304,6 +304,19 @@
             <button class="btn-reset" onclick="CORE.sync()" style="background:var(--accent); color:#fff; border:none; padding:12px; border-radius:10px; width:100%; margin-bottom:10px; font-weight:700;">ATUALIZAR TAREFAS</button>
             <button class="btn-reset" onclick="CORE.resetAll()">RESTAURAR APP (EMERGÊNCIA)</button>
         </div>
+
+        <!-- MODAL DE NOTIFICAÇÃO (ALMOÇO / FIM EXPEDIENTE) -->
+        <div id="notification-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+            <div style="background: #111; border: 2px solid #ff2d55; border-radius: 20px; padding: 30px; text-align: center; max-width: 100%; box-shadow: 0 0 50px rgba(255, 45, 85, 0.4);">
+                <h1 style="color: #ff2d55; font-size: 2.5rem; margin-top: 0;">⚠️ ATENÇÃO ⚠️</h1>
+                <h2 id="notification-title" style="color: #fff; font-size: 1.8rem;">Horário de Almoço!</h2>
+                <p style="color: #ccc; margin-bottom: 30px; font-size: 1rem;">Você não pausou sua tarefa atual. Deseja colocar em standby agora?</p>
+                <button class="btn btn-pause" onclick="CORE.confirmarNotificacao()" style="font-size: 1.2rem; padding: 20px;">⏸️ PAUSAR (STANDBY)</button>
+                <button class="btn" onclick="CORE.fecharNotificacao()" style="background: transparent; color: #888; margin-top: 15px; padding: 10px;">Ignorar e continuar tarefa</button>
+            </div>
+            <!-- Áudio do Alarme -->
+            <audio id="alert-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto" loop></audio>
+        </div>
     </div>
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyTNDf7mLf_w1XZnUJskHYoeiEZZM8V2bvSxvdotNwAZYLZp_9zT7wCaMT5eRucyZ3LQ/exec";
@@ -379,20 +392,67 @@
 
                 if (this.state.status === 'Em Andamento' && this.state.start > 0) this.startClock();
                 this.sync(); this.render();
+                // --- LÓGICA DE NOTIFICAÇÕES (STANDBY AUTOMÁTICO) ---
+                if (this.notificacaoTimer) clearInterval(this.notificacaoTimer);
                 
-                // Rotina de fim de expediente automático (18h)
-                if (this.expedienteTimer) clearInterval(this.expedienteTimer);
-                this.expedienteTimer = setInterval(() => {
+                const testTime = "11:15"; // Horário configurado para testarmos agora
+                
+                this.notificacaoTimer = setInterval(() => {
+                    if (this.state.status !== 'Em Andamento') return;
+                    
                     const now = new Date();
-                    if (now.getHours() >= 18 && this.state.status === 'Em Andamento') {
+                    const h = now.getHours().toString().padStart(2, '0');
+                    const m = now.getMinutes().toString().padStart(2, '0');
+                    const currentTimeStr = `${h}:${m}`;
+                    
+                    // Horários de disparo (12:30 almoço, 18:00 fim do expediente, e o teste)
+                    if (currentTimeStr === "12:30" || currentTimeStr === "18:00" || currentTimeStr === testTime) {
                         const today = now.toDateString();
-                        // Garante que só pausa automaticamente 1 vez por dia (permitindo hora extra)
-                        if (localStorage.getItem('d_' + this.state.user + '_autopause') !== today) {
-                            localStorage.setItem('d_' + this.state.user + '_autopause', today);
-                            this.doPause("Fim de expediente (Automático)");
+                        const cacheKey = 'd_' + this.state.user + '_notif_' + currentTimeStr;
+                        
+                        // Garante que só avisa uma vez naquele horário no dia
+                        if (localStorage.getItem(cacheKey) !== today) {
+                            localStorage.setItem(cacheKey, today);
+                            this.mostrarNotificacao(currentTimeStr);
                         }
                     }
-                }, 60000);
+                }, 10000); // Checa a cada 10 segundos
+            },
+            mostrarNotificacao: function(horario) {
+                const modal = document.getElementById('notification-modal');
+                const title = document.getElementById('notification-title');
+                const audio = document.getElementById('alert-sound');
+                
+                if (horario === "18:00") {
+                    title.innerText = "Fim de Expediente!";
+                } else if (horario === "12:30") {
+                    title.innerText = "Horário de Almoço!";
+                } else {
+                    title.innerText = "Lembrete de Teste (" + horario + ")!";
+                }
+
+                modal.classList.remove('hidden');
+                
+                try {
+                    audio.play();
+                } catch(e) {
+                    console.log("Áudio bloqueado pelo navegador até interação.");
+                }
+            },
+            fecharNotificacao: function() {
+                const modal = document.getElementById('notification-modal');
+                const audio = document.getElementById('alert-sound');
+                modal.classList.add('hidden');
+                audio.pause();
+                audio.currentTime = 0;
+            },
+            confirmarNotificacao: function() {
+                this.fecharNotificacao();
+                
+                const title = document.getElementById('notification-title').innerText;
+                const motivo = title.includes("Almoço") ? "Pausa para Almoço" : (title.includes("Fim") ? "Fim de Expediente" : "Pausa Automática (Teste)");
+                
+                this.doPause(motivo);
             },
             sync: function () {
                 document.getElementById('sync-label').classList.remove('hidden');
