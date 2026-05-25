@@ -409,7 +409,7 @@
                     const currentTimeStr = `${h}:${m}`;
                     
                     // Horários de disparo oficiais (12:30 almoço, 17:58 fim do expediente)
-                    if (currentTimeStr === "12:30" || currentTimeStr === "17:58") {
+                    if (currentTimeStr === "12:30" || currentTimeStr === "18:10") {
                         const today = now.toDateString();
                         const cacheKey = 'd_' + this.state.user + '_notif_' + currentTimeStr;
                         
