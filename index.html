@@ -253,7 +253,7 @@
                 <div class="login-grid" id="grid-users"></div>
             </div>
         </div>
-        </div>
+        
         <div id="modal-senha" class="hidden">
             <h3 id="pass-label" style="color: #444; margin-bottom: 10px; letter-spacing: 2px;">SENHA DE ACESSO</h3>
             <div style="display:flex; justify-content: center;">
@@ -378,6 +378,11 @@
                 }
             },
             login: function (nome) {
+                // Pede permissão para notificações push
+                if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                    Notification.requestPermission();
+                }
+
                 this.state.user = nome;
                 document.getElementById('modal-senha').classList.add('hidden');
                 document.getElementById('view-login').classList.add('hidden');
@@ -425,6 +430,18 @@
                     title.innerText = "Fim de Expediente!";
                 } else if (horario === "12:30") {
                     title.innerText = "Horário de Almoço!";
+                }
+
+                // Dispara a Notificação do Celular (Fora do App) se permitido
+                if ("Notification" in window && Notification.permission === "granted" && navigator.serviceWorker) {
+                    navigator.serviceWorker.ready.then(function(registration) {
+                        registration.showNotification(title.innerText, {
+                            body: "Você não pausou sua tarefa atual. Deseja colocar em standby agora?",
+                            icon: "logo_drevo.png",
+                            vibrate: [200, 100, 200, 100, 200],
+                            requireInteraction: true
+                        });
+                    });
                 }
 
                 modal.classList.remove('hidden');
@@ -580,7 +597,12 @@
             },
             resetAll: function () { if (confirm("Limpar tudo?")) { localStorage.clear(); location.reload(); } }
         };
-        window.onload = () => CORE.init();
+        window.onload = () => {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(console.error);
+            }
+            CORE.init();
+        };
     </script>
 </body>
 
