@@ -252,8 +252,8 @@
                 </div>
                 <div class="login-grid" id="grid-users"></div>
             </div>
+            <button id="btn-install" class="btn hidden" style="background:#4285F4; color:#fff; border-radius:10px; margin-top:10px; font-size:0.9rem; padding:15px;">📥 INSTALAR APP NA ÁREA DE TRABALHO</button>
         </div>
-        
         <div id="modal-senha" class="hidden">
             <h3 id="pass-label" style="color: #444; margin-bottom: 10px; letter-spacing: 2px;">SENHA DE ACESSO</h3>
             <div style="display:flex; justify-content: center;">
@@ -598,6 +598,23 @@
             },
             resetAll: function () { if (confirm("Limpar tudo?")) { localStorage.clear(); location.reload(); } }
         };
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Previne que o Chrome mostre o prompt padrão automaticamente na tela inteira
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('btn-install');
+            if (installBtn) {
+                installBtn.classList.remove('hidden');
+                installBtn.onclick = async () => {
+                    installBtn.classList.add('hidden');
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                };
+            }
+        });
+
         window.onload = () => {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').catch(console.error);
