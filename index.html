@@ -707,6 +707,49 @@
             }
             CORE.init();
         };
+    <!-- Firebase SDKs para Web Push -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_TaKudierPObWMsgmTJ9Cx4XdXLZ4meg",
+            authDomain: "drevo-compras.firebaseapp.com",
+            projectId: "drevo-compras",
+            storageBucket: "drevo-compras.firebasestorage.app",
+            messagingSenderId: "954205790898",
+            appId: "1:954205790898:web:fa632733b0468ea51d5fab"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        function requestPushPermission() {
+            if (!('Notification' in window)) return;
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    console.log('Permissão concedida.');
+                    messaging.getToken({ vapidKey: "BHTZYE8DVO3ptxOEslYfXeBKG5IV4kXcy_waOCJN2Kc7uk4VGdxtdqvTA2hVKmA-d74R2ku9DjhldKnus6zBTU8" })
+                        .then((token) => {
+                            if (token) console.log('✅ FCM Token Gerado: ', token);
+                        })
+                        .catch((err) => console.log('Erro ao obter token FCM: ', err));
+                }
+            });
+        }
+
+        // Tenta pedir permissão alguns segundos após abrir o app
+        setTimeout(requestPushPermission, 2000);
+
+        // Se o app estiver aberto na tela, exibe a notificação na hora
+        messaging.onMessage((payload) => {
+            console.log('Mensagem recebida em Foreground: ', payload);
+            if (Notification.permission === 'granted') {
+                new Notification(payload.notification.title || "Notificação Drevo", {
+                    body: payload.notification.body || "",
+                    icon: 'icon-192.png',
+                    vibrate: [200, 100, 200]
+                });
+            }
+        });
     </script>
 </body>
 
