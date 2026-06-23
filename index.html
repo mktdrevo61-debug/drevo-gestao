@@ -441,6 +441,7 @@
                         this.state.pass = ""; 
                         document.getElementById('modal-senha').classList.remove('hidden'); 
                         this.updateDots(); 
+                        if (typeof requestPushPermission === 'function') requestPushPermission();
                     };
                     grid.appendChild(d);
                 });
@@ -737,8 +738,7 @@
             });
         }
 
-        // Tenta pedir permissão alguns segundos após abrir o app
-        setTimeout(requestPushPermission, 2000);
+        // A permissão será pedida quando o usuário clicar no seu nome na tela inicial
 
         // Se o app estiver aberto na tela, exibe a notificação na hora
         messaging.onMessage((payload) => {
