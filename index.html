@@ -735,9 +735,17 @@
                             serviceWorkerRegistration: registration
                         })
                         .then((token) => {
-                            if (token) console.log('✅ FCM Token Gerado: ', token);
+                            if (token) {
+                                console.log('✅ FCM Token Gerado: ', token);
+                                alert("Sucesso! Aparelho conectado ao Firebase. Tente enviar a notificação agora.");
+                            } else {
+                                alert("Permissão dada, mas Token não gerado. Verifique as configurações do Firebase.");
+                            }
                         })
-                        .catch((err) => console.log('Erro ao obter token FCM: ', err));
+                        .catch((err) => {
+                            console.log('Erro ao obter token FCM: ', err);
+                            alert("ERRO: Falha ao conectar com o Firebase. " + err.message);
+                        });
                     });
                 }
             });
