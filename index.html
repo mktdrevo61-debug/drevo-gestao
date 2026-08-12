@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DREVO GESTÃO</title>
+    <link rel="icon" href="icon-192.png?v=3" type="image/png">
+    <link rel="apple-touch-icon" href="icon-192.png?v=3">
+    <link rel="manifest" href="manifest.json?v=3">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root {
+            /* Dark Premium Theme */
+            --bg: #0f1015;
+            --bg-gradient: radial-gradient(circle at top right, #1a1c23 0%, #0f1015 100%);
+            --accent: #ef4444;
+            --card: rgba(30, 32, 40, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #8b8d96;
+            --standby: #eab308;
+            --finish: #22c55e;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+            --glow: rgba(239, 68, 68, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* Glassmorphism Card */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0 40px 0;
+            width: 100%;
+        }
+        
+        .logo-img {
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+            max-width: 250px !important;
+        }
+
+        .timer {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 12vw, 5rem);
+            font-weight: 700;
+            margin: 25px 0;
+            color: var(--text-main);
+            letter-spacing: -1px;
+            white-space: nowrap;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3);
+        }
+
+        .task-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 22px;
+            margin: 12px 0;
+            border-radius: 18px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .task-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .task-item.active {
+            border-color: var(--accent);
+            background: rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+        }
+
+        .status-badge {
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+        
+        .task-item.active .status-badge {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+        }
+
+        .login-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .login-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 22px 15px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .login-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .login-item:active {
+            transform: scale(0.95);
+        }
+
+        /* Modal Lockscreen */
+        #modal-senha {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 16, 21, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            transition: opacity 0.3s ease;
+        }
+
+        .pass-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: transparent;
+            margin: 0 12px;
+            border: 2px solid var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .pass-dot.filled {
+            background: var(--text-main);
+            border-color: var(--text-main);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .key {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 300;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            transition: all 0.1s ease;
+        }
+
+        .key:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.9);
+        }
+
+        /* Views animations */
+        .view-fade {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .syncing {
+            font-size: 12px;
+            color: var(--accent);
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .btn-reset {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-top: 40px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        
+        .btn-reset:hover {
+            color: var(--text-main);
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 15px;
+            }
+            .card {
+                padding: 25px 20px;
+            }
+            .keypad {
+                gap: 20px;
+            }
+            .key {
+                width: 70px;
+                height: 70px;
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="logo-container">
+            <img src="logo_branca.png" alt="Drevo Logo" class="logo-img" style="max-width: 300px; height: auto;"
+                onerror="this.style.display='none'; document.getElementById('logo-text').style.display='block';">
+            <h1 id="logo-text" style="display:none; color: var(--text-main); font-family: 'Orbitron'; letter-spacing: 5px;">DREVO
+            </h1>
+        </div>
+        <div id="view-login" class="view-fade">
+            <div class="card" id="grid-card">
+                <div style="display:flex; justify-content: center; align-items:center; margin-bottom: 25px;">
+                    <h3 style="color: var(--text-muted); margin:0; font-weight: 300; text-align:center; width: 100%;">SELECIONE SEU NOME</h3>
+                </div>
+                <div class="login-grid" id="grid-users"></div>
+            </div>
+            <button id="btn-install" class="btn hidden" style="background:rgba(239, 68, 68, 0.15); color:var(--accent); border:1px solid rgba(239, 68, 68, 0.3); border-radius:16px; margin-top:10px; font-size:0.9rem; padding:18px;">📥 INSTALAR APP NA ÁREA DE TRABALHO</button>
+        </div>
+        <div id="modal-senha" class="hidden">
+            <h3 id="pass-label" style="color: var(--text-main); margin-bottom: 10px; letter-spacing: 2px;">SENHA DE ACESSO</h3>
+            <div style="display:flex; justify-content: center;">
+                <div class="pass-dot" id="dot-0"></div>
+                <div class="pass-dot" id="dot-1"></div>
+                <div class="pass-dot" id="dot-2"></div>
+                <div class="pass-dot" id="dot-3"></div>
+            </div>
+            <div class="keypad">
+                <div class="key" onclick="CORE.press(1)">1</div>
+                <div class="key" onclick="CORE.press(2)">2</div>
+                <div class="key" onclick="CORE.press(3)">3</div>
+                <div class="key" onclick="CORE.press(4)">4</div>
+                <div class="key" onclick="CORE.press(5)">5</div>
+                <div class="key" onclick="CORE.press(6)">6</div>
+                <div class="key" onclick="CORE.press(7)">7</div>
+                <div class="key" onclick="CORE.press(8)">8</div>
+                <div class="key" onclick="CORE.press(9)">9</div>
+                <div class="key" style="border:none; font-size:0.8rem; color:var(--text-muted); background:transparent;" onclick="CORE.closePass()">VOLTAR
+                </div>
+                <div class="key" onclick="CORE.press(0)">0</div>
+                <div class="key" style="border:none; font-size:0.8rem; color:var(--text-muted); background:transparent;" onclick="CORE.clearPass()">LIMPAR
+                </div>
+            </div>
+        </div>
+        <div id="view-app" class="hidden view-fade">
+            <div id="sync-label" class="syncing hidden">Sincronizando tarefas...</div>
+            <div class="card">
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <span id="ui-user" style="color: var(--accent); font-weight: 700; font-size: 1.1rem;">---</span>
+                    <button onclick="CORE.logout()"
+                        style="background:rgba(255,255,255,0.08); color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 12px; font-size: 11px; cursor: pointer;">SAIR</button>
+                </div>
+                <h2 id="ui-task" style="margin: 0 0 10px 0; font-size: 1.6rem; font-weight: 700;">Selecione uma tarefa
+                </h2>
+                <div class="timer" id="ui-timer">00:00:00</div>
+                <div id="ui-controls">
+                    <button id="btn-start" class="btn btn-start" onclick="CORE.doStart()">Iniciar Produção</button>
+                    <button id="btn-pause" class="btn btn-pause hidden" onclick="CORE.doPause()">Entrar em
+                        Standby</button>
+                    <button id="btn-resume" class="btn btn-start hidden" onclick="CORE.doResume()">Retomar
+                        Tarefa</button>
+                    <button id="btn-finish" class="btn btn-stop hidden" onclick="CORE.doFinish()">Finalizar
+                        Produção</button>
+                </div>
+            </div>
+            <div id="ui-list-tasks"></div>
+            <button class="btn" onclick="CORE.sync()" style="background:rgba(239, 68, 68, 0.15); color:var(--accent); border:1px solid rgba(239, 68, 68, 0.3); font-size:0.9rem;">ATUALIZAR TAREFAS</button>
+            <button class="btn-reset" onclick="CORE.resetAll()">RESTAURAR APP (EMERGÊNCIA)</button>
+        </div>
+
+        <!-- MODAL DE NOTIFICAÇÃO (ALMOÇO / FIM EXPEDIENTE) -->
+        <div id="notification-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+            <div style="background: #111; border: 2px solid #ff2d55; border-radius: 20px; padding: 30px; text-align: center; max-width: 100%; box-shadow: 0 0 50px rgba(255, 45, 85, 0.4);">
+                <h1 style="color: #ff2d55; font-size: 2.5rem; margin-top: 0;">⚠️ ATENÇÃO ⚠️</h1>
+                <h2 id="notification-title" style="color: #fff; font-size: 1.8rem;">Horário de Almoço!</h2>
+                <p style="color: #ccc; margin-bottom: 30px; font-size: 1rem;">Você não pausou sua tarefa atual. Deseja colocar em standby agora?</p>
+                <button class="btn btn-pause" onclick="CORE.confirmarNotificacao()" style="font-size: 1.2rem; padding: 20px;">⏸️ PAUSAR (STANDBY)</button>
+                <button class="btn" onclick="CORE.fecharNotificacao()" style="background: transparent; color: #888; margin-top: 15px; padding: 10px;">Ignorar e continuar tarefa</button>
+            </div>
+            <!-- Áudio do Alarme -->
+            <audio id="alert-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto" loop></audio>
+        </div>
+    </div>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyTNDf7mLf_w1XZnUJskHYoeiEZZM8V2bvSxvdotNwAZYLZp_9zT7wCaMT5eRucyZ3LQ/exec";
+        const EQUIPE = ["FABIO", "MAURICIO", "CAIO", "PEDRO", "GIL", "BRUNO", "VITOR M", "FERNANDO", "JHONATAN", "FABIO 'BARBA'", "GABRIEL", "CLAUDEMIR", "ROUTER"];
+
+        // Defina a senha de 4 dígitos para cada marceneiro aqui:
+        const SENHAS = {
+            "FABIO": "9258",
+            "MAURICIO": "2222",
+            "JOSÉ": "2525",
+            "PEDRO": "4444",
+            "DANIEL": "2017",
+            "BRUNO": "1535",
+            "VITOR M": "9749",
+            "FERNANDO": "2553",
+            "JHONATAN": "4148",
+            "FABIO 'BARBA'": "0000",
+            "GABRIEL": "1234",
+            "CLAUDEMIR": "1234",
+            "ROUTER": "1234"
+        };
+
+        const CORE = {
+            state: { user: null, temp: null, pass: "", task: null, status: 'Pendente', start: 0, timer: null },
+            init: function () {
+                this.showGrid();
+            },
+            showGrid: function () {
+                const grid = document.getElementById('grid-users');
+                grid.innerHTML = "";
+                
+                EQUIPE.forEach(u => {
+                    const d = document.createElement('div'); d.className = 'login-item'; d.innerText = u;
+                    d.onclick = () => { 
+                        this.state.temp = u; 
+                        this.state.pass = ""; 
+                        document.getElementById('modal-senha').classList.remove('hidden'); 
+                        this.updateDots(); 
+                        if (typeof requestPushPermission === 'function') requestPushPermission();
+                    };
+                    grid.appendChild(d);
+                });
+            },
+            closePass: function () { document.getElementById('modal-senha').classList.add('hidden'); },
+            clearPass: function () { this.state.pass = ""; this.updateDots(); },
+            updateDots: function () { for (let i = 0; i < 4; i++) document.getElementById('dot-' + i).classList.toggle('filled', i < this.state.pass.length); },
+            press: function (n) {
+                if (this.state.pass.length < 4) {
+                    this.state.pass += n; this.updateDots();
+                    if (this.state.pass.length === 4) {
+                        setTimeout(() => {
+                            if (this.state.pass === SENHAS[this.state.temp]) {
+                                this.login(this.state.temp);
+                            } else {
+                                this.clearPass();
+                                // Pequeno delay para a tela limpar as bolinhas antes do alerta travar a tela
+                                setTimeout(() => alert("Senha incorreta!"), 50);
+                            }
+                        }, 200);
+                    }
+                }
+            },
+            login: function (nome) {
+                // Pede permissão para notificações push
+                if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                    Notification.requestPermission();
+                }
+
+                this.state.user = nome;
+                document.getElementById('modal-senha').classList.add('hidden');
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('view-app').classList.remove('hidden');
+                document.getElementById('ui-user').innerText = nome;
+
+                const cacheTask = localStorage.getItem('d_' + nome + '_t');
+                this.state.task = cacheTask ? JSON.parse(cacheTask) : null;
+                this.state.status = localStorage.getItem('d_' + nome + '_s') || 'Pendente';
+                const cacheStart = localStorage.getItem('d_' + nome + '_st');
+                this.state.start = cacheStart ? Number(cacheStart) : 0;
+
+                if (this.state.status === 'Em Andamento' && this.state.start > 0) this.startClock();
+                this.sync(); this.render();
+                // --- LÓGICA DE NOTIFICAÇÕES (STANDBY AUTOMÁTICO) ---
+                if (this.notificacaoTimer) clearInterval(this.notificacaoTimer);
+                
+                this.notificacaoTimer = setInterval(() => {
+                    if (this.state.status !== 'Em Andamento') return;
+                    
+                    const now = new Date();
+                    const h = now.getHours().toString().padStart(2, '0');
+                    const m = now.getMinutes().toString().padStart(2, '0');
+                    const currentTimeStr = `${h}:${m}`;
+                    
+                    // Horários de disparo oficiais (12:30 almoço, 17:58 fim do expediente)
+                    if (currentTimeStr === "12:30" || currentTimeStr === "18:17") {
+                        const today = now.toDateString();
+                        const cacheKey = 'd_' + this.state.user + '_notif_' + currentTimeStr;
+                        
+                        // Garante que só avisa uma vez naquele horário no dia
+                        if (localStorage.getItem(cacheKey) !== today) {
+                            localStorage.setItem(cacheKey, today);
+                            this.mostrarNotificacao(currentTimeStr);
+                        }
+                    }
+                }, 10000); // Checa a cada 10 segundos
+            },
+            mostrarNotificacao: function(horario) {
+                const modal = document.getElementById('notification-modal');
+                const title = document.getElementById('notification-title');
+                const audio = document.getElementById('alert-sound');
+                
+                if (horario === "17:58") {
+                    title.innerText = "Fim de Expediente!";
+                } else if (horario === "12:30") {
+                    title.innerText = "Horário de Almoço!";
+                }
+
+                // Dispara a Notificação do Celular (Fora do App) se permitido
+                if ("Notification" in window && Notification.permission === "granted" && navigator.serviceWorker) {
+                    navigator.serviceWorker.ready.then(function(registration) {
+                        registration.showNotification(title.innerText, {
+                            body: "Você não pausou sua tarefa atual. Deseja colocar em standby agora?",
+                            icon: "logo_drevo.png",
+                            vibrate: [200, 100, 200, 100, 200],
+                            requireInteraction: true
+                        });
+                    });
+                }
+
+                modal.classList.remove('hidden');
+                
+                try {
+                    audio.play();
+                } catch(e) {
+                    console.log("Áudio bloqueado pelo navegador até interação.");
+                }
+            },
+            fecharNotificacao: function() {
+                const modal = document.getElementById('notification-modal');
+                const audio = document.getElementById('alert-sound');
+                modal.classList.add('hidden');
+                audio.pause();
+                audio.currentTime = 0;
+            },
+            confirmarNotificacao: function() {
+                this.fecharNotificacao();
+                
+                const title = document.getElementById('notification-title').innerText;
+                const motivo = title.includes("Almoço") ? "Pausa para Almoço" : (title.includes("Fim") ? "Fim de Expediente" : "Pausa Automática (Teste)");
+                
+                this.doPause(motivo);
+            },
+            sync: function () {
+                document.getElementById('sync-label').classList.remove('hidden');
+                const cb = 'cb' + Date.now();
+                window[cb] = (data) => {
+                    document.getElementById('sync-label').classList.add('hidden');
+                    const list = document.getElementById('ui-list-tasks'); list.innerHTML = "";
+                    if (!data.tarefas) return;
+                    data.tarefas.forEach(t => {
+                        const done = t.status === "Finalizado";
+
+                        // Pula (esconde) as tarefas que já estão finalizadas
+                        if (done) return;
+
+                        const div = document.createElement('div');
+                        div.className = 'task-item' + (this.state.task && t.row === this.state.task.row ? ' active' : '');
+                        div.innerHTML = `<div><strong>${t.nome}</strong><br><small style="color:#444">${t.status || 'Pendente'}</small></div><span class="status-badge" style="color:var(--accent)">OK</span>`;
+                        div.onclick = () => {
+                            if (this.state.status === 'Em Andamento' && this.state.task && t.row !== this.state.task.row) return alert("Pause ou finalize a atual primeiro!");
+                            this.state.task = t; this.state.status = t.status || 'Pendente'; this.save(); this.render();
+                        };
+                        list.appendChild(div);
+                    });
+                };
+                const s = document.createElement('script'); s.src = SCRIPT_URL + "?marceneiro=" + this.state.user + "&callback=" + cb; document.body.appendChild(s);
+            },
+            render: function () {
+                const uiTask = document.getElementById('ui-task');
+                const bStart = document.getElementById('btn-start'), bPause = document.getElementById('btn-pause'), bResume = document.getElementById('btn-resume'), bFinish = document.getElementById('btn-finish');
+                [bStart, bPause, bResume, bFinish].forEach(b => b.classList.add('hidden'));
+
+                // Remove o botão de projeto anterior se houver, para evitar duplicados ao re-renderizar
+                let btnProjeto = document.getElementById('btn-projeto');
+                if (btnProjeto) btnProjeto.remove();
+
+                if (!this.state.task) { uiTask.innerText = "Escolha uma tarefa"; bStart.classList.remove('hidden'); return; }
+                uiTask.innerText = this.state.task.nome;
+
+                // Verifica se há link do projeto/desenho na tarefa de forma extremamente flexível e resiliente
+                let linkProjeto = this.state.task.desenho || this.state.task.link || this.state.task.projeto || this.state.task['k 1'] || this.state.task['K 1'] || this.state.task['k1'] || this.state.task['K1'];
+
+                // Varredura inteligente de backup: se não achou pelas chaves comuns, busca qualquer campo da tarefa que comece com um link válido (http/https)
+                if (!linkProjeto) {
+                    for (const key in this.state.task) {
+                        const val = this.state.task[key];
+                        if (typeof val === 'string' && (val.startsWith('http://') || val.startsWith('https://'))) {
+                            linkProjeto = val;
+                            break;
+                        }
+                    }
+                }
+
+                if (linkProjeto && linkProjeto.trim() !== "") {
+                    btnProjeto = document.createElement('button');
+                    btnProjeto.id = 'btn-projeto';
+                    btnProjeto.className = 'btn';
+                    btnProjeto.style.background = '#4285F4'; // Azul oficial do Google Drive
+                    btnProjeto.style.color = '#fff';
+                    btnProjeto.innerText = 'Ver projeto';
+                    btnProjeto.onclick = () => window.open(linkProjeto.trim(), '_blank');
+                    const uiControls = document.getElementById('ui-controls');
+                    uiControls.parentNode.insertBefore(btnProjeto, uiControls);
+                }
+
+                if (this.state.status === 'Em Andamento') { bPause.classList.remove('hidden'); bFinish.classList.remove('hidden'); }
+                else if (this.state.status === 'Standby') { bResume.classList.remove('hidden'); bFinish.classList.remove('hidden'); }
+                else { bStart.classList.remove('hidden'); document.getElementById('ui-timer').innerText = "00:00:00"; }
+            },
+            doStart: function () {
+                if (!this.state.task) return alert("Selecione uma tarefa na lista!");
+                const agora = Date.now(); this.state.start = agora; this.state.status = 'Em Andamento';
+                this.save(); this.api("INICIAR"); this.startClock(); this.render();
+            },
+            doPause: function (motivoForcado = null) {
+                let m = motivoForcado;
+                if (!m) m = prompt("Motivo da pausa (ex: almoço, falta material)?");
+                if (m === null) return; // Usuário clicou em cancelar
+                if (m.trim() === "") m = "Pausa de rotina"; // Se deixou em branco, usa um padrão
+
+                this.state.status = 'Standby';
+                this.save();
+                if (this.state.timer) clearInterval(this.state.timer);
+                document.getElementById('ui-timer').innerText = "00:00:00"; // Zera visualmente o relógio
+                this.api("STANDBY", m);
+                this.render();
+            },
+            doResume: function () { this.state.status = 'Em Andamento'; this.state.start = Date.now(); this.save(); this.api("RETOMAR"); this.startClock(); this.render(); },
+            doFinish: function () {
+                if (!confirm("Deseja finalizar e concluir esta tarefa?")) return;
+
+                const n = this.state.user;
+                if (this.state.timer) clearInterval(this.state.timer);
+                localStorage.removeItem('d_' + n + '_t');
+                localStorage.removeItem('d_' + n + '_s');
+                localStorage.removeItem('d_' + n + '_st');
+
+                this.api("FINALIZAR").then(() => {
+                    alert("Concluído!");
+                    location.reload();
+                });
+            },
+            startClock: function () {
+                if (this.state.timer) clearInterval(this.state.timer);
+                const atualizar = () => {
+                    if (!this.state.start || this.state.start === 0) return;
+                    const diff = Math.floor((Date.now() - Number(this.state.start)) / 1000);
+                    if (isNaN(diff) || diff < 0) return;
+                    const h = Math.floor(diff / 3600); const m = Math.floor((diff % 3600) / 60); const s = diff % 60;
+                    document.getElementById('ui-timer').innerText = h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0') + ":" + s.toString().padStart(2, '0');
+                };
+                atualizar(); this.state.timer = setInterval(atualizar, 1000);
+            },
+            api: function (a, o = "") {
+                return fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: a, marceneiro: this.state.user, row: this.state.task.row, obs: o }) })
+                    .then(() => { setTimeout(() => this.sync(), 1500); });
+            },
+            save: function () {
+                const n = this.state.user; if (!n) return;
+                localStorage.setItem('d_' + n + '_t', JSON.stringify(this.state.task));
+                localStorage.setItem('d_' + n + '_s', this.state.status);
+                localStorage.setItem('d_' + n + '_st', this.state.start);
+            },
+            logout: function () {
+                if (this.state.status === 'Em Andamento') {
+                    alert("Você não pode sair enquanto uma tarefa está 'Em Andamento'. Por favor, clique em 'Entrar em Standby' primeiro!");
+                    return;
+                }
+                location.reload();
+            },
+            resetAll: function () { if (confirm("Limpar tudo?")) { localStorage.clear(); location.reload(); } }
+        };
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Previne que o Chrome mostre o prompt padrão automaticamente na tela inteira
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('btn-install');
+            if (installBtn) {
+                installBtn.classList.remove('hidden');
+                installBtn.onclick = async () => {
+                    installBtn.classList.add('hidden');
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                };
+            }
+        });
+
+        window.onload = () => {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(console.error);
+            }
+            CORE.init();
+        };
+    </script>
+    <!-- Firebase SDKs para Web Push -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_TaKudierPObWMsgmTJ9Cx4XdXLZ4meg",
+            authDomain: "drevo-compras.firebaseapp.com",
+            projectId: "drevo-compras",
+            storageBucket: "drevo-compras.firebasestorage.app",
+            messagingSenderId: "954205790898",
+            appId: "1:954205790898:web:fa632733b0468ea51d5fab"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        function requestPushPermission() {
+            if (!('Notification' in window)) return;
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    console.log('Permissão concedida.');
+                    navigator.serviceWorker.ready.then((registration) => {
+                        messaging.getToken({ 
+                            vapidKey: "BHTZYE8DVO3ptxOEslYfXeBKG5IV4kXcy_waOCJN2Kc7uk4VGdxtdqvTA2hVKmA-d74R2ku9DjhldKnus6zBTU8",
+                            serviceWorkerRegistration: registration
+                        })
+                        .then((token) => {
+                            if (token) {
+                                console.log('✅ FCM Token Gerado: ', token);
+                                alert("Sucesso! Aparelho conectado ao Firebase. Tente enviar a notificação agora.");
+                            } else {
+                                alert("Permissão dada, mas Token não gerado. Verifique as configurações do Firebase.");
+                            }
+                        })
+                        .catch((err) => {
+                            console.log('Erro ao obter token FCM: ', err);
+                            alert("ERRO: Falha ao conectar com o Firebase. " + err.message);
+                        });
+                    });
+                }
+            });
+        }
+
+        // A permissão será pedida quando o usuário clicar no seu nome na tela inicial
+
+        // Se o app estiver aberto na tela, exibe a notificação na hora
+        messaging.onMessage((payload) => {
+            console.log('Mensagem recebida em Foreground: ', payload);
+            if (Notification.permission === 'granted') {
+                new Notification(payload.notification.title || "Notificação Drevo", {
+                    body: payload.notification.body || "",
+                    icon: 'icon-192.png',
+                    vibrate: [200, 100, 200]
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
